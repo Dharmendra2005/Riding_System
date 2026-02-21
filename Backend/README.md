@@ -160,6 +160,73 @@ Content-Type: application/json
 
 ---
 
+### 2. Login User
+
+Authenticates a user and returns a JWT token.
+
+**Endpoint:**
+```
+POST /users/login
+```
+
+**Request Headers:**
+```
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
+
+**Validation Rules:**
+| Field | Rule |
+|-------|------|
+| `email` | Must be a valid email format |
+| `password` | Minimum 6 characters |
+
+**Success Response (200 OK):**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "_id": "65f1a2b3c4d5e6f7g8h9i0j1",
+    "fullName": {
+      "firstName": "John",
+      "lastName": "Doe"
+    },
+    "email": "john@example.com"
+  }
+}
+```
+
+**Error Response (400 Bad Request) - Validation Error:**
+```json
+{
+  "error": [
+    {
+      "type": "field",
+      "value": "invalid-email",
+      "msg": "Email is unvalid",
+      "path": "email",
+      "location": "body"
+    }
+  ]
+}
+```
+
+**Error Response (401 Unauthorized) - Invalid Credentials:**
+```json
+{
+  "message": "Invalid email or password"
+}
+```
+
+---
+
 ## Models
 
 ### User Model
@@ -230,6 +297,17 @@ curl -X POST http://localhost:4000/users/register \
   }'
 ```
 
+### Login User
+
+```bash
+curl -X POST http://localhost:4000/users/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "password123"
+  }'
+```
+
 ---
 
 ## Testing with Postman
@@ -259,7 +337,6 @@ curl -X POST http://localhost:4000/users/register \
 
 ## Future Endpoints (Planned)
 
-- `POST /users/login` - User login
 - `GET /users/profile` - Get user profile
 - `PUT /users/profile` - Update user profile
 - `POST /users/logout` - User logout
