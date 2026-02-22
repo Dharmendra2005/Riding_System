@@ -13,10 +13,12 @@ app.use(cors());
 app.use(cookieParser());
 
 const userRouter = require("./routes/userRouter");
+const captainRouter = require("./routes/captainRouter");
 app.get("/", (req, res) => {
   res.send("hello");
 });
 
 app.use("/users", userRouter);
+app.use("/captains", captainRouter);
 
 module.exports = app;
