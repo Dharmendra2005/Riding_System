@@ -1,5 +1,5 @@
 const dotenv = require("dotenv");
-dotenv.config();
+dotenv.config();  
 const cors = require("cors"); //enable secure communication between web applications running on different origins (different domains, ports, or protocols).
 const express = require("express");
 const cookieParser = require("cookie-parser");
