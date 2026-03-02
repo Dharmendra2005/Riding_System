@@ -14,11 +14,15 @@ app.use(cookieParser());
 
 const userRouter = require("./routes/userRouter");
 const captainRouter = require("./routes/captainRouter");
+const mapRouter = require("./routes/mapRouter");
+const rideRouter = require("./routes/rideRouter");
 app.get("/", (req, res) => {
   res.send("hello");
 });
 
 app.use("/users", userRouter);
 app.use("/captains", captainRouter);
+app.use("/maps", mapRouter);
+app.use("/rides", rideRouter);
 
 module.exports = app;

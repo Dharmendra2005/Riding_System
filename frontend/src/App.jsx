@@ -11,6 +11,11 @@ import CaptainProtectWrapper from "./pages/CaptainProtectWrapper";
 import UserLogout from "./pages/UserLogout";
 import CaptainHomePage from "./pages/CaptainHomePage";
 import Riding from "./pages/Riding";
+import UserRequestPoppup from "./components/PopPup";
+import RideConfirmation from "./pages/RideConfirmation";
+import PickUpUser from "./pages/PickUpUser";
+import CustomerRequests from "./pages/CustomerRequests";
+import OtpPanel from "./components/OtpPanel";
 
 
 const App = () => {
@@ -26,6 +31,10 @@ const App = () => {
        <Route path = "/user-home" element={<UserProtectWrapper> <UserHomePage/></UserProtectWrapper>}/>
        <Route path = "/user/logout" element={<UserProtectWrapper><UserLogout/></UserProtectWrapper>}/>
        <Route path = "/captain-home" element={<CaptainProtectWrapper><CaptainHomePage/></CaptainProtectWrapper>}/>
+       <Route path = "/RideConfirmation" element={<CaptainProtectWrapper><RideConfirmation/></CaptainProtectWrapper>}/>
+       <Route path = "/getotp" element={<CaptainProtectWrapper><OtpPanel/></CaptainProtectWrapper>}/>
+       <Route path = "/pickup" element={<CaptainProtectWrapper><PickUpUser/></CaptainProtectWrapper>}/>
+       <Route path = "/requests" element={<CaptainProtectWrapper><CustomerRequests/></CaptainProtectWrapper>}/>
       </Routes>
     </div>
   );

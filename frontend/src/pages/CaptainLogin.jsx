@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { CaptainDataContext } from "../context/CaptainContext";
+import DriverLogo from "../assets/UberDriverlogo.svg";
 
 const CaptainLogin = () => {
   const [email, setEmail] = useState("");
@@ -41,7 +42,7 @@ const CaptainLogin = () => {
         {/* here logo for the fleet drivers */}
         <img
           className="w-20 mb-10"
-          src="https://www.svgrepo.com/show/505031/uber-driver.svg"
+          src= {DriverLogo}
           alt="Uber"
         />
 
