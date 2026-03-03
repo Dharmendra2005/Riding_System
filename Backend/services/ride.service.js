@@ -67,9 +67,10 @@ module.exports.createRide = async ({
   if (!userId || !pickupLocation || !dropoffLocation || !vehicleType) {
     throw new Error("All fields are required");
   }
+  
+  // Get fare and distance/time data
   const fare = await module.exports.getFare(pickupLocation, dropoffLocation);
-
-  //   console.log(fare);
+  const distanceTime = await mapService.getDistanceAndTime(pickupLocation, dropoffLocation);
 
   const ride = await rideModel.create({
     user: userId,
@@ -77,7 +78,30 @@ module.exports.createRide = async ({
     dropoffLocation,
     fare: fare[vehicleType],
     otp: genOTP(6),
+    vehicleType,
+    distance: distanceTime.distance, // in meters
+    duration: distanceTime.duration, // in seconds
   });
 
+  return ride;
+};
+
+
+module.exports.confirmRide = async (rideId, captainId) => {
+  if (!rideId) {
+    throw new Error("Ride ID is required");
+  }
+
+  await rideModel.findOneAndUpdate(
+    { _id: rideId },
+    {
+      status: "accepted",
+      captain: captainId,
+    })
+
+  const ride = await rideModel.findOne({_id : ride}).populate("user").populate("captain").select("+otp");
+  if (!ride) {
+    throw new Error("Ride not found");
+  }
   return ride;
 };

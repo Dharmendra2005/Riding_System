@@ -1,4 +1,5 @@
 const axios = require("axios");
+const captainModel = require("../models/captain.model");
 
 module.exports.getAddressCoordinates = async (address) => {
   const apiKey = process.env.OPENWEATHERMAP_API_KEY;
@@ -80,7 +81,7 @@ module.exports.getAutoCompleteSuggestions = async (input) => {
 
   try {
     const response = await axios.get(url);
-    console.log("OpenWeatherMap API AutoComplete Response:", response.data);
+    // console.log("OpenWeatherMap API AutoComplete Response:", response.data);
     if (response.data && response.data.length > 0) {
       return response.data.map((location) => {
         // Create formatted description like Google Places API
@@ -107,4 +108,64 @@ module.exports.getAutoCompleteSuggestions = async (input) => {
     );
     throw error;
   }
+};
+
+module.exports.getCaptainsNearby = async (ltd, lng, radius) => {
+  // radius in km
+  // Haversine formula to calculate distance between two coordinates
+  const toRadians = (degree) => degree * (Math.PI / 180);
+
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Earth's radius in km
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRadians(lat1)) *
+        Math.cos(toRadians(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+  };
+
+  // Check ALL captains first
+  const allCaptainsInDB = await captainModel.find({});
+  console.log("\n=== Database Debug ===");
+  console.log(`Total captains in database: ${allCaptainsInDB.length}`);
+  allCaptainsInDB.forEach((captain, i) => {
+    console.log(
+      `Captain ${i + 1}: status="${captain.status}", location=${captain.location?.ltd ? `(${captain.location.ltd}, ${captain.location.lng})` : "NOT SET"}, socketId=${captain.socketId || "null"}`,
+    );
+  });
+
+  // Get all active captains
+  const allCaptains = await captainModel.find({ status: "active" });
+
+  console.log("\n=== Captain Search Debug ===");
+  console.log(`Search Location: ltd=${ltd}, lng=${lng}, radius=${radius}km`);
+  console.log(`Total active captains: ${allCaptains.length}`);
+
+  // Filter captains by distance
+  const nearbyCaptains = allCaptains.filter((captain) => {
+    if (!captain.location || !captain.location.ltd || !captain.location.lng) {
+      console.log(`Captain ${captain._id} has no location data`);
+      return false;
+    }
+    const distance = calculateDistance(
+      ltd,
+      lng,
+      captain.location.ltd,
+      captain.location.lng,
+    );
+    console.log(
+      `Captain ${captain._id}: location(${captain.location.ltd}, ${captain.location.lng}), distance=${distance.toFixed(10)}km`,
+    );
+    return distance <= radius;
+  });
+
+  console.log(`Captains within ${radius}km: ${nearbyCaptains.length}`);
+  console.log("===========================\n");
+
+  return nearbyCaptains;
 };

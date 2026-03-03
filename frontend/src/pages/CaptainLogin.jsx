@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { CaptainDataContext } from "../context/CaptainContext";
+import { CaptainDataContext } from "../context/CaptainDataContext";
 import DriverLogo from "../assets/UberDriverlogo.svg";
 
 const CaptainLogin = () => {
@@ -10,7 +10,8 @@ const CaptainLogin = () => {
 
   const navigate = useNavigate();
 
-  const { captain, setCaptain } = React.useContext(CaptainDataContext);
+  // const { captain, setCaptain } = React.useContext(CaptainDataContext);
+  const { setCaptain } = React.useContext(CaptainDataContext);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -26,7 +27,7 @@ const CaptainLogin = () => {
       if (response.status === 200) {
         const data = response.data;
 
-        setCaptain(data.user);
+        setCaptain(data.captain);
         localStorage.setItem("token", data.token);
         navigate("/captain-home");
       }
@@ -40,11 +41,7 @@ const CaptainLogin = () => {
     <div className="p-7 h-screen flex flex-col justify-between">
       <div>
         {/* here logo for the fleet drivers */}
-        <img
-          className="w-20 mb-10"
-          src= {DriverLogo}
-          alt="Uber"
-        />
+        <img className="w-20 mb-10" src={DriverLogo} alt="Uber" />
 
         <form
           onSubmit={(e) => {

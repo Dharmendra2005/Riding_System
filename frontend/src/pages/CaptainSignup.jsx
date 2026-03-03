@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { CaptainDataContext } from "../context/CaptainContext";
+import { CaptainDataContext } from "../context/CaptainDataContext";
 import CaptainHomePage from "./CaptainHomePage";
 
 const CaptainSignup = () => {
@@ -17,7 +17,7 @@ const CaptainSignup = () => {
 
   const navigate = useNavigate();
 
-  const { captain, setCaptain } = React.useContext(CaptainDataContext);
+  const {setCaptain} = React.useContext(CaptainDataContext);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -43,7 +43,9 @@ const CaptainSignup = () => {
       if (response.status === 201) {
         const data = response.data;
 
-        setCaptain(data.user);
+        // setCaptain(data.user);
+        setCaptain(data.captain);
+
         localStorage.setItem("token", data.token);
 
         navigate("/captain-home");

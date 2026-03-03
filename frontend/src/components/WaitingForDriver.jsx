@@ -1,7 +1,7 @@
 import React from "react";
 
 const WaitingForDriver = (props) => {
-  const { pickup, destination, fare, selectedVehicle } = props;
+  const { pickup, destination, fare, selectedVehicle, ride } = props;
 
   // Vehicle configuration
   const vehicleConfig = {
@@ -24,6 +24,18 @@ const WaitingForDriver = (props) => {
 
   const currentVehicle = selectedVehicle && vehicleConfig[selectedVehicle];
   const currentFare = fare && selectedVehicle ? fare[selectedVehicle] : 0;
+
+  // Get captain info from ride data
+  const captain = ride?.captain;
+  const captainName = captain
+    ? `${captain.fullName?.firstName || ""} ${captain.fullName?.lastName || ""}`.trim()
+    : "Captain";
+  const vehiclePlate = captain?.vehicle?.plate || "Plate Number";
+  const vehicleColor = captain?.vehicle?.color || "Vehicle";
+  const vehicleCapacity = captain?.vehicle?.capacity || "";
+  const vehicleType = captain?.vehicle?.vehicleType || "Vehicle";
+  const otp = ride?.otp || "OTP";
+  
 
   return (
     <>
@@ -56,9 +68,14 @@ const WaitingForDriver = (props) => {
               />
             </div>
             <div className="text-right pb-3">
-              <h2 className=" ">Dharm Gora</h2>
-              <h4 className=" text-xl font-medium ">RJ21 2433</h4>
-              <p className="text-sm text-gray-600">Maruti Suzuki Alto</p>
+              <h2 className="text-lg font-semibold">{captainName}</h2>
+              <h4 className="text-xl font-medium">{vehiclePlate}</h4>
+              <p className="text-sm text-gray-600">
+                {vehicleColor}{" "}
+                {vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1)}
+                {vehicleCapacity && ` • ${vehicleCapacity} seats`}
+              </p>
+              <h4 className="text-xl font-medium">{`OTP : ${otp}`}</h4>
             </div>
           </div>
           <div className="w-full">

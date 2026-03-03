@@ -1,14 +1,34 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const UserRequestPoppup = (props) => {
+  const { rideData } = props;
+  const navigate = useNavigate();
+
+  if (!rideData) {
+    return null; // Don't render if no ride data
+  }
+
+  const handleAccept = async () => {
+    console.log("Accepting ride with data:", rideData);
+    props.setRequestPanel(false);
+    
+    // Confirm ride with backend first
+    await props.confirmRide();
+    
+    // Then navigate to confirmation page
+    navigate("/RideConfirmation", { state: { rideData } });
+  };
+
   return (
     <div className="flex flex-col">
-     
-        <i onClick={() => {
+      <i
+        onClick={() => {
           props.setRequestPanel(false);
-        }} className="absolute p-1 text-center pt-3 top-0 w-full text-3xl text-gray-700 ri-arrow-down-wide-line"></i>
-    
+        }}
+        className="absolute p-1 text-center pt-3 top-0 w-full text-3xl text-gray-700 ri-arrow-down-wide-line"
+      ></i>
+
       <div className="p-8 bg-white bottom-5 m-3 shadow-[5px_5px_px5_5px] rounded-2xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -18,47 +38,64 @@ const UserRequestPoppup = (props) => {
               alt="profile"
             />
             <div>
-              <h2 className="text-lg font-semibold">Shyaam Lakhan</h2>
+              <h2 className="text-lg font-semibold">
+                {rideData.user?.fullName?.firstName || "User"}{" "}
+                {rideData.user?.fullName?.lastName || ""}
+              </h2>
               <div className="flex text-xs gap-3 mt-1">
-                <p className="bg-yellow-300 rounded-lg p-1">Payble</p>
-                <p className="bg-yellow-300 rounded-lg p-1">Discount</p>
+                <p className="bg-yellow-300 rounded-lg p-1">
+                  {rideData.vehicleType}
+                </p>
+                <p className="bg-green-300 rounded-lg p-1">{rideData.status}</p>
               </div>
             </div>
           </div>
           <div className="text-right">
-            <h4 className="text-lg font-semibold">₹295.30</h4>
-            <p className="text-xs  font-medium">2.2KM</p>
+            <h4 className="text-lg font-semibold">
+              ₹{rideData.fare?.toFixed(2)}
+            </h4>
+            <p className="text-xs font-medium">
+              {rideData.distance
+                ? `${(rideData.distance / 1000).toFixed(1)} KM`
+                : "N/A"}
+            </p>
+            <p className="text-xs text-gray-500">
+              {rideData.duration
+                ? `${(rideData.duration / 60).toFixed(0)} min`
+                : ""}
+            </p>
           </div>
         </div>
 
         {/* Stats Grid - Fixed alignment and equal spacing */}
         <div className="w-full p-5">
           <div className="flex items-center gap-3 mb-3 text-bold ml-3 border-b-2 border-gray-200 pb-3">
-            <h4 className="text-gray-300"> PICK UP</h4>
+            <h4 className="text-gray-300">PICK UP</h4>
             <i className="ri-map-pin-2-line"></i>
             <div>
-              <h3 className="text-sm">564/11-A</h3>
-              <p className="text-xs">Kaikondrahailli Bangluru, Karnataka</p>
+              <p className="text-sm font-medium">{rideData.pickupLocation}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 mb-3 text-bold ml-3 border-b-2 border-gray-200 pb-3">
-            <h4 className="text-gray-300"> DROP OFF</h4>
+            <h4 className="text-gray-300">DROP OFF</h4>
             <i className="ri-map-pin-2-line"></i>
             <div>
-              <h3 className="text-sm">123/31-C</h3>
-              <p className="text-xs">Kishanpura Bhopal, MP</p>
+              <p className="text-sm font-medium">{rideData.dropoffLocation}</p>
             </div>
           </div>
         </div>
         <div className="flex items-center justify-between mt-5 gap-3">
           <div className=" bg-gray-400 rounded-lg text-white text-center px-10 py-2">
-            <button onClick={() => {
-              props.setRequestPanel(false);
-            }}>Ignore</button>
+            <button
+              onClick={() => {
+                props.setRequestPanel(false);
+              }}
+            >
+              Ignore
+            </button>
           </div>
           <div className=" bg-yellow-300 rounded-lg text-white text-center px-10 py-2">
-            <Link to={"/RideConfirmation"} onClick={() => {
-            }}>Accept</Link>
+            <button onClick={handleAccept}>Accept</button>
           </div>
         </div>
       </div>

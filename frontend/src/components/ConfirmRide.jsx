@@ -1,4 +1,5 @@
 import React from "react";
+import axios from "axios";
 
 const ConfirmRide = (props) => {
   const { pickup, destination, fare, selectedVehicle } = props;
@@ -24,6 +25,38 @@ const ConfirmRide = (props) => {
 
   const currentVehicle = selectedVehicle && vehicleConfig[selectedVehicle];
   const currentFare = fare && selectedVehicle ? fare[selectedVehicle] : 0;
+
+  const createRide = async () => {
+    console.log("Creating ride with:", {
+      pickup,
+      destination,
+      vehicleType: selectedVehicle,
+    });
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/rides/create-ride`,
+        {
+          pickupLocation: pickup,
+          dropoffLocation: destination,
+          vehicleType: selectedVehicle,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+
+      console.log("Ride created successfully:", response.data);
+      console.log("Ride will be sent to nearby captains automatically");
+      props.setVehicleFound(true);
+      props.setConfirmRidePanelOpen(false);
+    } catch (error) {
+      console.error("Error creating ride:", error);
+      alert("Failed to create ride. Please try again.");
+    }
+  };
 
   return (
     <>
@@ -75,14 +108,7 @@ const ConfirmRide = (props) => {
             </div>
           </div>
           <div className="w-full mt-3 bg-green-700 rounded-lg text-white text-center p-3">
-            <button
-              onClick={() => {
-                props.setVehicleFound(true);
-                props.setConfirmRidePanelOpen(false);
-              }}
-            >
-              Confirm
-            </button>
+            <button onClick={createRide}>Confirm</button>
           </div>
         </div>
       </div>

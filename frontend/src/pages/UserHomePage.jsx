@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useRef } from "react";
+import { useContext } from "react";
 import axios from "axios";
 import "remixicon/fonts/remixicon.css"; //for icons
 import LocalSearchPanel from "../components/LocationSearchPanel";
@@ -9,10 +10,14 @@ import VehiclePanelOpen from "../components/VehiclePanelOpen";
 import ConfirmRidePanel from "../components/ConfirmRide";
 import LookingForDriver from "../components/LookingForDriver";
 import WaitingForDriver from "../components/WaitingForDriver";
+import { SocketContext } from "../context/SocketContext";
+import { UserDataContext } from "../context/UserContext";
 
 const UserHomePage = () => {
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
+  const [actualPickup, setActualPickup] = useState(""); // Store actual pickup location
+  const [actualDestination, setActualDestination] = useState(""); // Store actual destination
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
   const [destinationSuggestions, setDestinationSuggestions] = useState([]);
   const [activeField, setActiveField] = useState(null); // Track which field is active
@@ -29,6 +34,28 @@ const UserHomePage = () => {
   const [waitingForDriver, setWaitingForDriver] = useState(false);
   const [fare, setFare] = useState(null);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [confirmedRide, setConfirmedRide] = useState(null);
+  const { user } = useContext(UserDataContext);
+  const { socket } = useContext(SocketContext);
+
+  useEffect(() => {
+    if (user?._id) {
+      socket.emit("join", { userType: "user", userId: user._id });
+    }
+
+    const handleRideConfirmed = (ride) => {
+      console.log("Ride confirmed by captain:", ride);
+      setConfirmedRide(ride);
+      setVehicleFound(false);
+      setWaitingForDriver(true);
+    };
+
+    socket.on("ride-confirmed", handleRideConfirmed);
+
+    return () => {
+      socket.off("ride-confirmed", handleRideConfirmed);
+    };
+  }, [user, socket]);
 
   // Fetch suggestions from backend
   const fetchSuggestions = async (input, fieldType) => {
@@ -96,21 +123,33 @@ const UserHomePage = () => {
   const handleSuggestionClick = (suggestion) => {
     if (activeField === "pickup") {
       setPickup(suggestion.description);
+      setActualPickup(suggestion.description); // Save actual location
       setPickupSuggestions([]);
       // Check if destination is already filled
       if (destination && destination.length > 0) {
-        fetchFare(suggestion.description, destination);
+        fetchFare(suggestion.description, actualDestination || destination);
         setpanelOpen(false);
         setVehiclePanelOpen(true);
+        // Clear inputs after opening vehicle panel
+        setTimeout(() => {
+          setPickup("");
+          setDestination("");
+        }, 300);
       }
     } else {
       setDestination(suggestion.description);
+      setActualDestination(suggestion.description); // Save actual location
       setDestinationSuggestions([]);
       // Check if pickup is already filled
       if (pickup && pickup.length > 0) {
-        fetchFare(pickup, suggestion.description);
+        fetchFare(actualPickup || pickup, suggestion.description);
         setpanelOpen(false);
         setVehiclePanelOpen(true);
+        //clear field when user select location and open vehicle panel
+        setTimeout(() => {
+          setPickup("");
+          setDestination("");
+        }, 300);
       }
     }
   };
@@ -256,8 +295,8 @@ const UserHomePage = () => {
           <ConfirmRidePanel
             setConfirmRidePanelOpen={setConfirmRidePanelOpen}
             setVehicleFound={setVehicleFound}
-            pickup={pickup}
-            destination={destination}
+            pickup={actualPickup}
+            destination={actualDestination}
             fare={fare}
             selectedVehicle={selectedVehicle}
           />
@@ -268,8 +307,8 @@ const UserHomePage = () => {
         >
           <LookingForDriver
             setConfirmRidePanelOpen={setConfirmRidePanelOpen}
-            pickup={pickup}
-            destination={destination}
+            pickup={actualPickup}
+            destination={actualDestination}
             fare={fare}
             selectedVehicle={selectedVehicle}
             setVehicleFound={setVehicleFound}
@@ -281,10 +320,11 @@ const UserHomePage = () => {
         >
           <WaitingForDriver
             waitingForDriver={waitingForDriver}
-            pickup={pickup}
-            destination={destination}
+            pickup={actualPickup}
+            destination={actualDestination}
             fare={fare}
             selectedVehicle={selectedVehicle}
+            ride={confirmedRide}
           />
         </div>
       </div>

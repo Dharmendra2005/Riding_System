@@ -17,4 +17,9 @@ router.get("/get-fare",authMiddleware.authUser,
     query('pickupLocation').isString().isLength({min:3}).withMessage('Pickup location should be at least 3 characters long'),
     query('dropoffLocation').isString().isLength({min:3}).withMessage('Dropoff location should be at least 3 characters long'),
     rideController.getFare);
+
+router.post("/confirm-ride",authMiddleware.authCaptain,
+    body('rideId').isMongoId().withMessage('Invalid ride ID'),
+    rideController.confirmRide
+)
 module.exports = router;
