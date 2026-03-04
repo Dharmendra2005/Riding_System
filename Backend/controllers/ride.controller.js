@@ -134,3 +134,62 @@ module.exports.confirmRide = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+module.exports.startRide = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array() });
+  }
+  const { rideId, otp } = req.query;
+  const captainId = req.captain._id;
+
+  try {
+    const ride = await rideService.startRide(rideId, otp, req.captain);
+
+    if (!ride) {
+      return res.status(404).json({ error: "Ride not found" });
+    }
+    console.log(`Ride ${rideId} started by captain ${captainId}`);
+    console.log(
+      `Notifying user ${ride.user._id}, socketId: ${ride.user.socketId}`,
+    );
+    // Notify user that ride is started
+    SendMessageToSocketId(ride.user.socketId, {
+      event: "ride-started",
+      data: ride,
+    });
+    return res.status(200).json({ ride });
+  } catch (error) {
+    console.error("Error starting ride:", error);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports.endRide = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array() });
+  }
+  try {
+    const { rideId } = req.body;
+    const captainId = req.captain._id;
+
+    const ride = await rideService.endRide(rideId);
+    if (!ride) {
+      return res.status(404).json({ error: "Ride not found" });
+    }
+    // Notify user that ride is ended
+    SendMessageToSocketId(ride.user.socketId, {
+      event: "ride-ended",
+      data: ride,
+    });
+    console.log(
+      `Notifying user ${ride.user._id}, socketId: ${ride.user.socketId}`,
+    );
+    console.log(`Ride ${rideId} ended by captain ${captainId}`);
+    return res.status(200).json({ message: "Ride ended successfully" });
+  } catch (error) {
+    console.error("Error ending ride:", error);
+    return res.status(500).json({ error: error.message });
+  }
+};

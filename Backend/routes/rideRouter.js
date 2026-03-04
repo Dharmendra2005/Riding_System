@@ -22,4 +22,19 @@ router.post("/confirm-ride",authMiddleware.authCaptain,
     body('rideId').isMongoId().withMessage('Invalid ride ID'),
     rideController.confirmRide
 )
+
+router.get("/start-ride", authMiddleware.authCaptain,
+    query('rideId').isMongoId().withMessage('Invalid ride ID'),
+    query('otp').isNumeric().isLength({ min: 6, max: 6 }).withMessage('OTP must be a 6-digit number'),
+    rideController.startRide
+)
+
+router.post("/end-ride", authMiddleware.authCaptain,
+    body('rideId').isMongoId().withMessage('Invalid ride ID'),
+    rideController.endRide
+)
+
+
+
+
 module.exports = router;

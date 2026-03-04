@@ -12,8 +12,10 @@ import LookingForDriver from "../components/LookingForDriver";
 import WaitingForDriver from "../components/WaitingForDriver";
 import { SocketContext } from "../context/SocketContext";
 import { UserDataContext } from "../context/UserContext";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const UserHomePage = () => {
+  const navigate = useNavigate();
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
   const [actualPickup, setActualPickup] = useState(""); // Store actual pickup location
@@ -57,6 +59,22 @@ const UserHomePage = () => {
     };
   }, [user, socket]);
 
+  useEffect(() => {
+    const handleRideStarted = (ride) => {
+      console.log("Ride started by captain:", ride);
+      // Navigate to riding page when ride is started
+      navigate("/riding", { state: { rideData: ride } });
+    };
+
+    socket.on("ride-started", handleRideStarted);
+
+    return () => {
+      socket.off("ride-started", handleRideStarted);
+    };
+  }, [socket, navigate]);
+
+
+
   // Fetch suggestions from backend
   const fetchSuggestions = async (input, fieldType) => {
     if (input.length < 3) {
@@ -71,7 +89,7 @@ const UserHomePage = () => {
         {
           params: { input },
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
         },
       );
@@ -110,7 +128,7 @@ const UserHomePage = () => {
             dropoffLocation: destLoc,
           },
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            Authorization: `Bearer ${localStorage.getItem("userToken")}`,
           },
         },
       );
@@ -213,7 +231,7 @@ const UserHomePage = () => {
       <img
         src="https://freelogopng.com/images/all_img/1659761100uber-logo-png.png"
         alt="Uber"
-        className="w-20 absolute top-7 left-6 z-10"
+        className="w-20 absolute top-7 left-6 z-10 hidden"
       />
 
       <div className="h-screen w-full">

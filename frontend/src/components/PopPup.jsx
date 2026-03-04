@@ -16,7 +16,7 @@ const UserRequestPoppup = (props) => {
     // Confirm ride with backend first
     await props.confirmRide();
     
-    // Then navigate to confirmation page
+    
     navigate("/RideConfirmation", { state: { rideData } });
   };
 

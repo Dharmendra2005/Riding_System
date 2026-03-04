@@ -1,26 +1,55 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+
+import { SocketContext } from "../context/SocketContext";
 
 const Riding = () => {
-  const rideData = {
-    driverName: "Dharm Gora",
-    vehicleNumber: "RJ21 2433",
-    carModel: "Maruti Suzuki Alto",
-    pickupTitle: "564/11-A",
-    pickupAddress: "Kaikondrahalli Bengaluru, Karnataka",
-    dropTitle: "123/31-C",
-    dropAddress: "Kishanpura Bhopal, MP",
-    price: 193.2,
-  };
+  const location = useLocation();
+  const ride = location.state?.rideData;
+  const { socket }  = useContext(SocketContext);
+  const navigate = useNavigate();
+
+
+  socket.on("ride-ended", () => {
+    navigate("/user-home");
+  });
+
+
+
+  // Extract captain info from ride data
+  const captain = ride?.captain;
+  const captainName = captain
+    ? `${captain.fullName?.firstName || ""} ${captain.fullName?.lastName || ""}`.trim()
+    : "Driver";
+  const vehiclePlate = captain?.vehicle?.plate || "N/A";
+  const vehicleColor = captain?.vehicle?.color || "";
+  const vehicleType = captain?.vehicle?.vehicleType || "Vehicle";
+
+  // If no ride data, show fallback
+  if (!ride) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center">
+        <p className="text-lg mb-4">No ride data available</p>
+        <Link to="/user-home" className="text-blue-500 underline">
+          Go back to home
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex flex-col justify-between bg-white overflow-hidden">
-        <img
-            src="https://freelogopng.com/images/all_img/1659761100uber-logo-png.png"
-            alt="Uber"
-            className="w-20 absolute top-7 left-6 z-10"
-        />
-      <Link to={"/user-home"} className="fixed h-8 w-8 bg-white flex items-center justify-center rounded-full right-2 top-3">
+      <img
+        src="https://freelogopng.com/images/all_img/1659761100uber-logo-png.png"
+        alt="Uber"
+        className="w-20 absolute top-7 left-6 z-10"
+      />
+      <Link
+        to={"/user-home"}
+        className="fixed h-8 w-8 bg-white flex items-center justify-center rounded-full right-2 top-3"
+      >
         <i className=" text-lg font-medium ri-home-5-line"></i>
       </Link>
       {/* Top Animation Section */}
@@ -33,9 +62,9 @@ const Riding = () => {
       </div>
 
       {/* Ride Details Section */}
-      <div className="flex flex-col justify-between items-center pt-5 flex-grow">
-
+      <div className="flex flex-col justify-between items-center pt-3 flex-grow">
         {/* Driver Info */}
+        <h2 className="text-xl p-1 mb-2 font-medium text-bold text-center ">You're on Ride</h2>
         <div className="flex justify-between items-center w-full px-4 mb-2">
           <div className="flex gap-3">
             <img
@@ -51,14 +80,11 @@ const Riding = () => {
           </div>
 
           <div className="text-right mr-5">
-            <h2 className="text-sm font-semibold">
-              {rideData.driverName}
-            </h2>
-            <h4 className="text-lg font-medium">
-              {rideData.vehicleNumber}
-            </h4>
+            <h2 className="text-sm font-semibold">{captainName}</h2>
+            <h4 className="text-lg font-medium">{vehiclePlate}</h4>
             <p className="text-sm text-gray-600">
-              {rideData.carModel}
+              {vehicleColor}{" "}
+              {vehicleType.charAt(0).toUpperCase() + vehicleType.slice(1)}
             </p>
           </div>
         </div>
@@ -69,12 +95,8 @@ const Riding = () => {
           <div className="flex items-start gap-3 border-b border-gray-200 ">
             <i className="ri-map-pin-2-line text-lg text-gray-700"></i>
             <div>
-              <h3 className="text-sm font-semibold">
-                {rideData.dropTitle}
-              </h3>
-              <p className="text-gray-600">
-                {rideData.dropAddress}
-              </p>
+              <h3 className="text-sm font-semibold">Destination</h3>
+              <p className="text-gray-600">{ride.dropoffLocation || "N/A"}</p>
             </div>
           </div>
 
@@ -83,11 +105,9 @@ const Riding = () => {
             <i className="ri-money-rupee-circle-fill text-lg text-gray-700"></i>
             <div>
               <h3 className="text-sm font-semibold">
-                ₹{rideData.price.toFixed(2)}
+                ₹{ride.fare?.toFixed(2) || "0.00"}
               </h3>
-              <p className="text-gray-600">
-                Cash Payment
-              </p>
+              <p className="text-gray-600">Cash Payment</p>
             </div>
           </div>
         </div>
@@ -99,7 +119,6 @@ const Riding = () => {
           Make a Payment
         </button>
       </div>
-
     </div>
   );
 };

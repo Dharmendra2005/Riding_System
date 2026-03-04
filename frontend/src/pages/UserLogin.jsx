@@ -10,7 +10,7 @@ const UserLogin = () => {
   // const [userData, setUserData] = useState([]);
   const navigate = useNavigate();
 
-  const { user, setUser } = React.useContext(UserDataContext);
+  const { setUser } = React.useContext(UserDataContext);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -25,7 +25,7 @@ const UserLogin = () => {
     if (response.status === 200) {
       const data = response.data;
       setUser(data.user);
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("userToken", data.token);
       navigate("/user-home");
     }
     setEmail("");

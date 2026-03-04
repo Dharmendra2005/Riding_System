@@ -6,7 +6,7 @@ import { UserDataContext } from "../context/UserContext";
 const UserProtectWrapper = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const { setUser } = useContext(UserDataContext);
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("userToken");
   const navigate = useNavigate();
   // Check if the token exists, if not redirect to login page
   useEffect(() => {
