@@ -1,4 +1,4 @@
-# Uber Clone Backend API
+# Riding System Backend API
 
 A comprehensive RESTful API backend for an Uber-like ride-sharing application with real-time features built using Node.js, Express, MongoDB, and Socket.IO.
 
